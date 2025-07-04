@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { Sparkles, Download, Eye } from 'lucide-react';
+import { Sparkles, Download, Eye, Copy } from 'lucide-react';
 
 const BannerGenerator = () => {
   const { user } = useAuth();
@@ -23,7 +23,7 @@ const BannerGenerator = () => {
   const [generatedBanner, setGeneratedBanner] = useState<{
     text: string;
     imageUrl?: string;
-    bannerUrl?: string;
+    tmdbData?: any;
   } | null>(null);
 
   const categories = [
@@ -46,10 +46,12 @@ const BannerGenerator = () => {
       let tmdbData = null;
       if (formData.category === 'nova_serie' && formData.contentName) {
         tmdbData = await searchTMDB(formData.contentName);
+        console.log('TMDB Data:', tmdbData);
       }
 
       // 2. Gerar texto com IA
       const generatedText = await generateTextWithAI(formData, tmdbData);
+      console.log('Generated text:', generatedText);
 
       // 3. Salvar no banco
       const { data: banner, error } = await supabase
@@ -72,12 +74,13 @@ const BannerGenerator = () => {
         imageUrl: tmdbData?.poster_path 
           ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`
           : undefined,
+        tmdbData: tmdbData,
       });
 
       toast.success('Banner gerado com sucesso!');
     } catch (error: any) {
       console.error('Error generating banner:', error);
-      toast.error('Erro ao gerar banner. Tente novamente.');
+      toast.error('Erro ao gerar banner: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -86,9 +89,10 @@ const BannerGenerator = () => {
   const searchTMDB = async (query: string) => {
     try {
       const response = await fetch(
-        `https://api.themoviedb.org/3/search/multi?api_key=YOUR_TMDB_API_KEY&query=${encodeURIComponent(query)}&language=pt-BR`
+        `https://api.themoviedb.org/3/search/multi?api_key=9ad8d9636cfef372a0cdc36cda29393a&query=${encodeURIComponent(query)}&language=pt-BR`
       );
       const data = await response.json();
+      console.log('TMDB API Response:', data);
       return data.results?.[0] || null;
     } catch (error) {
       console.error('TMDB search error:', error);
@@ -97,15 +101,41 @@ const BannerGenerator = () => {
   };
 
   const generateTextWithAI = async (formData: any, tmdbData: any) => {
-    // Simulação da geração de texto - aqui você integraria com OpenAI
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-banner-text', {
+        body: {
+          category: formData.category,
+          title: formData.title,
+          contentName: formData.contentName,
+          tmdbData: tmdbData
+        }
+      });
+
+      if (error) throw error;
+      return data.generatedText;
+    } catch (error) {
+      console.error('Error generating text with AI:', error);
+      // Fallback para templates básicos se a IA falhar
+      return getFallbackText(formData, tmdbData);
+    }
+  };
+
+  const getFallbackText = (formData: any, tmdbData: any) => {
     const templates = {
-      nova_serie: `🎬 NOVIDADE NO CATÁLOGO! 🎬\n\n${tmdbData?.name || formData.contentName} ${tmdbData ? `(${tmdbData.vote_average}/10 ⭐)` : ''}\n\n${tmdbData?.overview?.substring(0, 100) || 'Nova série imperdível chegou!'}\n\n🔥 Assista agora no nosso IPTV!\n💥 Qualidade 4K disponível\n\n👆 Entre em contato e assine já!`,
+      nova_serie: `🎬 NOVIDADE NO CATÁLOGO! 🎬\n\n${tmdbData?.name || tmdbData?.title || formData.contentName} ${tmdbData ? `(${tmdbData.vote_average?.toFixed(1)}/10 ⭐)` : ''}\n\n${tmdbData?.overview?.substring(0, 100) || 'Nova série imperdível chegou!'}\n\n🔥 Assista agora no nosso IPTV!\n💥 Qualidade 4K disponível\n\n👆 Entre em contato e assine já!`,
       promocao: `🚨 OFERTA IMPERDÍVEL! 🚨\n\n${formData.title}\n\n💰 Preço especial por tempo limitado\n🎁 Bônus exclusivos para novos clientes\n⚡ Ativação imediata\n\n📱 Chama no WhatsApp e garante já!`,
       comemorativo: `🎉 ${formData.title} 🎉\n\nComemore conosco com ofertas especiais!\n\n🎁 Promoções exclusivas\n💫 Benefícios únicos\n⭐ Atendimento premium\n\n📞 Entre em contato e aproveite!`,
       revendedor: `💼 OPORTUNIDADE DE NEGÓCIO! 💼\n\n${formData.title}\n\n🚀 Seja nosso parceiro\n💰 Comissões atrativas\n📈 Suporte completo\n🎯 Material de divulgação incluso\n\n📱 Chama no WhatsApp e vamos conversar!`
     };
 
     return templates[formData.category as keyof typeof templates] || formData.customText;
+  };
+
+  const copyToClipboard = async () => {
+    if (generatedBanner?.text) {
+      await navigator.clipboard.writeText(generatedBanner.text);
+      toast.success('Texto copiado para a área de transferência!');
+    }
   };
 
   return (
@@ -196,24 +226,35 @@ const BannerGenerator = () => {
                   <img 
                     src={generatedBanner.imageUrl} 
                     alt="Poster"
-                    className="w-24 h-36 object-cover rounded-lg"
+                    className="w-24 h-36 object-cover rounded-lg shadow-lg"
                   />
                 )}
                 <div className="flex-1">
                   <div className="whitespace-pre-wrap text-sm leading-relaxed">
                     {generatedBanner.text}
                   </div>
+                  {generatedBanner.tmdbData && (
+                    <div className="mt-3 text-xs opacity-75">
+                      <p>⭐ {generatedBanner.tmdbData.vote_average?.toFixed(1)}/10</p>
+                      <p>📅 {generatedBanner.tmdbData.release_date || generatedBanner.tmdbData.first_air_date}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
             
             <div className="mt-4 flex space-x-2">
+              <Button 
+                onClick={copyToClipboard}
+                className="flex-1"
+                variant="outline"
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copiar Texto
+              </Button>
               <Button className="flex-1">
                 <Download className="w-4 h-4 mr-2" />
                 Baixar Banner
-              </Button>
-              <Button variant="outline">
-                Editar Texto
               </Button>
             </div>
           </CardContent>
