@@ -8,7 +8,9 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import CreateBanner from "./pages/CreateBanner";
 import Pricing from "./pages/Pricing";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -20,9 +22,18 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/create" element={<CreateBanner />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/create" element={
+            <ProtectedRoute>
+              <CreateBanner />
+            </ProtectedRoute>
+          } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,387 +1,304 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, Zap, Upload, Users, Calendar, BarChart3, Check, ArrowRight, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { 
+  Sparkles, 
+  Zap, 
+  Users, 
+  Target, 
+  Crown, 
+  CheckCircle,
+  ArrowRight,
+  PlayCircle,
+  TrendingUp,
+  Shield
+} from 'lucide-react';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
-  const features = [
-    {
-      icon: Sparkles,
-      title: 'IA Copywriting',
-      description: 'Textos persuasivos gerados automaticamente para cada tipo de divulgação'
-    },
-    {
-      icon: Upload,
-      title: 'Logo Automática',
-      description: 'Faça upload uma vez e sua logo aparece em todos os banners criados'
-    },
-    {
-      icon: Zap,
-      title: 'Criação em Segundos',
-      description: 'Do conceito ao banner finalizado em menos de 30 segundos'
-    },
-    {
-      icon: Calendar,
-      title: 'Calendário Inteligente',
-      description: 'Sugestões automáticas baseadas em datas comemorativas e sazonalidade'
-    },
-    {
-      icon: Users,
-      title: 'Modo Agência',
-      description: 'Gerencie múltiplos clientes com pastas organizadas e colaboração'
-    },
-    {
-      icon: BarChart3,
-      title: 'Templates Focados',
-      description: 'Designs otimizados especificamente para IPTV e pequenos negócios'
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
     }
-  ];
-
-  const testimonials = [
-    {
-      name: 'Carlos Silva',
-      business: 'IPTV Premium',
-      text: 'Triplicou meus revendedores em 2 meses usando os banners automáticos',
-      image: '/placeholder-avatar-1.jpg'
-    },
-    {
-      name: 'Marina Agência',
-      business: 'Social Media',
-      text: 'Economizo 20 horas por semana criando artes para meus 15 clientes',
-      image: '/placeholder-avatar-2.jpg'
-    },
-    {
-      name: 'João Delivery',
-      business: 'Restaurante',
-      text: 'Aumento de 40% nas vendas depois que comecei a postar diariamente',
-      image: '/placeholder-avatar-3.jpg'
-    }
-  ];
-
-  const useCases = [
-    {
-      title: 'Revendedores IPTV',
-      description: 'Crie banners para promoções, novos conteúdos e captação de sub-revendedores',
-      examples: ['Promoção primeiro mês grátis', 'Novo filme disponível', 'Seja nosso parceiro']
-    },
-    {
-      title: 'Delivery & Comércio Local',
-      description: 'Divulgue ofertas, novos produtos e atraia mais clientes',
-      examples: ['Oferta do dia', 'Cardápio semanal', 'Promoção frete grátis']
-    },
-    {
-      title: 'Agências & Freelancers',
-      description: 'Atenda múltiplos clientes com agilidade e qualidade profissional',
-      examples: ['Gestão de 20+ marcas', 'Agendamento automático', 'Relatórios de performance']
-    }
-  ];
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="relative z-10 px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+            <div className="bg-gradient-to-r from-blue-400 to-purple-400 p-2 rounded-lg">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">PostPix IA</h1>
-              <p className="text-xs text-gray-500">Banners profissionais com IA</p>
-            </div>
+            <h1 className="text-2xl font-bold text-white">PostPix IA</h1>
           </div>
+          
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" onClick={() => navigate('/pricing')}>
-              Preços
-            </Button>
-            <Button 
-              onClick={() => navigate('/dashboard')}
-              className="bg-gradient-to-r from-purple-600 to-pink-600"
-            >
-              Começar Grátis
-            </Button>
+            {isAuthenticated ? (
+              <Button 
+                onClick={() => navigate('/dashboard')}
+                className="bg-white text-purple-900 hover:bg-gray-100"
+              >
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  className="text-white hover:text-purple-200"
+                  onClick={() => navigate('/auth')}
+                >
+                  Entrar
+                </Button>
+                <Button 
+                  onClick={handleGetStarted}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                >
+                  Começar Grátis
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-6">
+      <section className="relative px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-7xl mx-auto text-center">
-          <Badge className="mb-6 bg-purple-100 text-purple-700 hover:bg-purple-100">
-            🚀 Perfeito para IPTV, Delivery e Pequenos Negócios
-          </Badge>
-          
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Crie banners que
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              {" "}vendem{" "}
-            </span>
-            em segundos
-          </h1>
-          
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Nossa IA especializada cria textos persuasivos e banners profissionais 
-            automaticamente. Ideal para revendedores IPTV, delivery, agências e 
-            microempreendedores que precisam divulgar com frequência.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Button 
-              size="lg" 
-              onClick={() => navigate('/dashboard')}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-3 text-lg"
-            >
-              Criar Primeiro Banner Grátis
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-            <Button size="lg" variant="outline" className="px-8 py-3">
-              <Play className="w-5 h-5 mr-2" />
-              Ver Demo (2 min)
-            </Button>
-          </div>
-
-          <div className="flex items-center justify-center space-x-8 text-sm text-gray-500">
-            <div className="flex items-center">
-              <Check className="w-4 h-4 text-green-600 mr-2" />
-              3 banners grátis
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+                Crie banners
+                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  {" "}profissionais
+                </span>
+                <br />
+                em segundos com IA
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+                A plataforma perfeita para <strong>revendedores de IPTV</strong>, <strong>pequenos negócios</strong> e <strong>microempreendedores</strong> criarem conteúdo visual que vende
+              </p>
             </div>
-            <div className="flex items-center">
-              <Check className="w-4 h-4 text-green-600 mr-2" />
-              Sem cartão de crédito
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                onClick={handleGetStarted}
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-3"
+              >
+                <PlayCircle className="w-5 h-5 mr-2" />
+                Começar Grátis Agora
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="border-white text-white hover:bg-white hover:text-purple-900 text-lg px-8 py-3"
+                onClick={() => navigate('/pricing')}
+              >
+                Ver Preços
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
             </div>
-            <div className="flex items-center">
-              <Check className="w-4 h-4 text-green-600 mr-2" />
-              Resultado em 30s
+
+            <div className="flex items-center justify-center space-x-6 text-blue-200">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span>Grátis para começar</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span>IA incluída</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span>Sem instalação</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Demo Visual */}
-      <section className="py-16 px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Como funciona?
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Simples como responder: "O que você quer divulgar hoje?"
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-purple-600 font-bold text-xl">1</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Descreva sua divulgação</h3>
-              <p className="text-gray-600 text-sm">
-                "Promoção 50% off no primeiro mês do IPTV Premium"
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-purple-600 font-bold text-xl">2</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">IA gera textos + templates</h3>
-              <p className="text-gray-600 text-sm">
-                Copy persuasivo + 3 opções de design + sua logo integrada
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-purple-600 font-bold text-xl">3</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Baixe e publique</h3>
-              <p className="text-gray-600 text-sm">
-                Formatos otimizados para Instagram, Facebook e WhatsApp
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-20 px-6">
+      {/* Features Section */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Por que escolher PostPix IA?
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Por que escolher o PostPix IA?
             </h2>
-            <p className="text-xl text-gray-600">
-              Desenvolvido especificamente para quem precisa vender online
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Desenvolvido especificamente para quem vende online e precisa de conteúdo visual profissional
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <feature.icon className="w-12 h-12 text-purple-600 mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+            <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-8 rounded-2xl">
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 rounded-xl w-fit mb-4">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">IA Especializada</h3>
+              <p className="text-gray-600">
+                Textos publicitários gerados automaticamente para IPTV, delivery, vendas online e captação de revendedores
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-teal-50 p-8 rounded-2xl">
+              <div className="bg-gradient-to-r from-green-600 to-teal-600 p-3 rounded-xl w-fit mb-4">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Rápido e Simples</h3>
+              <p className="text-gray-600">
+                Crie banners profissionais em menos de 30 segundos. Perfeito para quem não tem tempo nem conhecimento de design
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 p-8 rounded-2xl">
+              <div className="bg-gradient-to-r from-orange-600 to-red-600 p-3 rounded-xl w-fit mb-4">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Templates Focados</h3>
+              <p className="text-gray-600">
+                Layouts otimizados para WhatsApp, Instagram e Facebook. Cada template é pensado para gerar mais vendas
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-xl w-fit mb-4">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Logo Automático</h3>
+              <p className="text-gray-600">
+                Faça upload da sua logo uma vez e ela aparece automaticamente em todos os banners criados
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-8 rounded-2xl">
+              <div className="bg-gradient-to-r from-yellow-600 to-orange-600 p-3 rounded-xl w-fit mb-4">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Integração TMDB</h3>
+              <p className="text-gray-600">
+                Para revendedores de IPTV: digite o nome da série/filme e busque automaticamente capa e informações
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-pink-50 to-purple-50 p-8 rounded-2xl">
+              <div className="bg-gradient-to-r from-pink-600 to-purple-600 p-3 rounded-xl w-fit mb-4">
+                <Crown className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Modo Agência</h3>
+              <p className="text-gray-600">
+                Gerencie múltiplos clientes, salve diferentes logos e organize banners por pastas
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Use Cases */}
-      <section className="py-20 px-6 bg-white">
+      {/* Target Audience */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Feito para seu negócio
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Feito para quem vende online
             </h2>
             <p className="text-xl text-gray-600">
-              Seja qual for seu segmento, temos templates e textos otimizados
+              Ideal para empreendedores que precisam divulgar, mas não sabem criar artes
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {useCases.map((useCase, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-8">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">{useCase.title}</h3>
-                  <p className="text-gray-600 mb-6">{useCase.description}</p>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Exemplos:</p>
-                    {useCase.examples.map((example, i) => (
-                      <div key={i} className="flex items-center text-sm text-gray-600">
-                        <Check className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
-                        {example}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                title: "Revendedores IPTV",
+                description: "Divulgue novos conteúdos, promoções e capte novos clientes",
+                icon: "📺"
+              },
+              {
+                title: "Delivery & Food",
+                description: "Promova pratos, ofertas especiais e atraia mais pedidos",
+                icon: "🍔"
+              },
+              {
+                title: "Lojas Online",
+                description: "Produtos em destaque, liquidações e lançamentos",
+                icon: "🛍️"
+              },
+              {
+                title: "Social Medias",
+                description: "Atenda múltiplos clientes pequenos com agilidade",
+                icon: "📱"
+              }
+            ].map((audience, index) => (
+              <div key={index} className="bg-white p-6 rounded-xl shadow-sm border">
+                <div className="text-4xl mb-4 text-center">{audience.icon}</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">
+                  {audience.title}
+                </h3>
+                <p className="text-gray-600 text-center text-sm">
+                  {audience.description}
+                </p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Resultados reais de quem usa
-            </h2>
-            <p className="text-xl text-gray-600">
-              Mais de 1.200 empreendedores já aumentaram suas vendas
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-white">
-                <CardContent className="p-8">
-                  <div className="flex mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className="text-yellow-400 text-xl">★</span>
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-6 italic">"{testimonial.text}"</p>
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mr-4">
-                      <span className="text-white font-bold text-sm">
-                        {testimonial.name.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                      <p className="text-sm text-gray-600">{testimonial.business}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* CTA Section */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 bg-gradient-to-r from-purple-900 to-blue-900">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-white">
+                Pare de perder vendas por falta de conteúdo visual
+              </h2>
+              <p className="text-xl text-blue-100">
+                Comece a criar banners profissionais hoje mesmo. É grátis!
+              </p>
+            </div>
 
-      {/* CTA Final */}
-      <section className="py-20 px-6 bg-gradient-to-r from-purple-600 to-pink-600">
-        <div className="max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-4xl font-bold mb-6">
-            Pronto para vender mais?
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Junte-se aos milhares de empreendedores que já descobriram o poder 
-            dos banners automáticos com IA
-          </p>
-          <Button 
-            size="lg" 
-            onClick={() => navigate('/dashboard')}
-            className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
-          >
-            Começar Grátis Agora
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-          <p className="text-sm mt-4 opacity-75">
-            3 banners grátis • Sem cartão de crédito • Resultado em 30 segundos
-          </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={handleGetStarted}
+                size="lg"
+                className="bg-white text-purple-900 hover:bg-gray-100 text-lg px-8 py-3"
+              >
+                <Shield className="w-5 h-5 mr-2" />
+                Começar Grátis - 3 Banners/Mês
+              </Button>
+            </div>
+
+            <div className="text-blue-200 text-sm">
+              ✅ Sem cartão de crédito • ✅ Sem instalação • ✅ Resultados em 30 segundos
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-6">
+      <footer className="bg-gray-900 text-white px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center space-x-3 mb-8">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <div className="bg-gradient-to-r from-blue-400 to-purple-400 p-2 rounded-lg">
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold">PostPix IA</span>
+            <h3 className="text-2xl font-bold">PostPix IA</h3>
           </div>
           <p className="text-gray-400 mb-8">
-            Transformando pequenos negócios com o poder da IA
+            A plataforma de IA para criação de banners profissionais
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
-            <div>
-              <h4 className="font-semibold mb-4">Produto</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>Templates</li>
-                <li>IA Copywriting</li>
-                <li>Upload de Logo</li>
-                <li>Modo Agência</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Casos de Uso</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>IPTV</li>
-                <li>Delivery</li>
-                <li>E-commerce</li>
-                <li>Serviços</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Recursos</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>Blog</li>
-                <li>Tutoriais</li>
-                <li>Suporte</li>
-                <li>Status</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Empresa</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>Sobre</li>
-                <li>Contato</li>
-                <li>Privacidade</li>
-                <li>Termos</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-gray-400 text-sm">
-            © 2024 PostPix IA. Todos os direitos reservados.
+          <div className="border-t border-gray-800 pt-8">
+            <p className="text-gray-500">
+              © 2024 PostPix IA. Todos os direitos reservados.
+            </p>
           </div>
         </div>
       </footer>

@@ -9,7 +9,78 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      banners: {
+        Row: {
+          banner_url: string | null
+          category: string
+          content_name: string | null
+          created_at: string
+          generated_text: string | null
+          id: string
+          title: string
+          tmdb_data: Json | null
+          user_id: string
+        }
+        Insert: {
+          banner_url?: string | null
+          category: string
+          content_name?: string | null
+          created_at?: string
+          generated_text?: string | null
+          id?: string
+          title: string
+          tmdb_data?: Json | null
+          user_id: string
+        }
+        Update: {
+          banner_url?: string | null
+          category?: string
+          content_name?: string | null
+          created_at?: string
+          generated_text?: string | null
+          id?: string
+          title?: string
+          tmdb_data?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          banners_created_this_month: number | null
+          business_name: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          logo_url: string | null
+          plan: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          banners_created_this_month?: number | null
+          business_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          logo_url?: string | null
+          plan?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          banners_created_this_month?: number | null
+          business_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          logo_url?: string | null
+          plan?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

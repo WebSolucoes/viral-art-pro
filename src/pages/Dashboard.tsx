@@ -1,173 +1,277 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Upload, Sparkles, Calendar, Users, BarChart3, Settings } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import LogoUploader from '@/components/LogoUploader';
+import BannerGenerator from '@/components/BannerGenerator';
+import { 
+  LayoutDashboard, 
+  Image, 
+  Settings, 
+  LogOut, 
+  Plus,
+  TrendingUp,
+  Users,
+  Calendar
+} from 'lucide-react';
 
 const Dashboard = () => {
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [userPlan] = useState('free'); // free, pro, agency
+  const [profile, setProfile] = useState<any>(null);
+  const [recentBanners, setRecentBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const quickActions = [
-    {
-      title: "Criar Banner Promocional",
-      description: "Divulgue promoções e ofertas especiais",
-      icon: Sparkles,
-      category: "promocao",
-      popular: true
-    },
-    {
-      title: "Novo Conteúdo IPTV",
-      description: "Anuncia lançamentos de filmes e séries",
-      icon: Upload,
-      category: "iptv",
-      popular: true
-    },
-    {
-      title: "Data Comemorativa",
-      description: "Posts para feriados e datas especiais",
-      icon: Calendar,
-      category: "comemorativa"
-    },
-    {
-      title: "Captar Revendedores",
-      description: "Artes para atrair novos parceiros",
-      icon: Users,
-      category: "revendedor"
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+      loadRecentBanners();
     }
-  ];
+  }, [user]);
 
-  const recentProjects = [
-    { name: "Promoção Black Friday", type: "Promocional", date: "Hoje" },
-    { name: "Novo Filme - Avatar 3", type: "IPTV", date: "Ontem" },
-    { name: "Dia das Mães 2024", type: "Comemorativa", date: "2 dias atrás" }
-  ];
+  const loadProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user!.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      if (!data) {
+        // Create profile if it doesn't exist
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user!.id,
+            full_name: user!.user_metadata?.full_name,
+            business_name: user!.user_metadata?.business_name,
+          })
+          .select()
+          .single();
+        
+        if (insertError) throw insertError;
+        setProfile(newProfile);
+      } else {
+        setProfile(data);
+      }
+    } catch (error: any) {
+      console.error('Error loading profile:', error);
+      toast.error('Erro ao carregar perfil');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadRecentBanners = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('banners')
+        .select('*')
+        .eq('user_id', user!.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      setRecentBanners(data || []);
+    } catch (error: any) {
+      console.error('Error loading banners:', error);
+    }
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user!.id}/logo.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(fileName);
+
+      // Update profile with logo URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ logo_url: publicUrl })
+        .eq('user_id', user!.id);
+
+      if (updateError) throw updateError;
+
+      setProfile(prev => ({ ...prev, logo_url: publicUrl }));
+      toast.success('Logo salva com sucesso!');
+    } catch (error: any) {
+      console.error('Error uploading logo:', error);
+      toast.error('Erro ao fazer upload do logo');
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg">
+                <LayoutDashboard className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">PostPix IA</h1>
+                <p className="text-sm text-gray-500">Dashboard</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">PostPix IA</h1>
-              <p className="text-sm text-gray-500">Crie banners profissionais em segundos</p>
+            
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">
+                Olá, {profile?.full_name || user?.email}!
+              </span>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </Button>
             </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Badge variant={userPlan === 'free' ? 'secondary' : 'default'}>
-              {userPlan === 'free' ? 'Gratuito' : userPlan === 'pro' ? 'Pro' : 'Agência'}
-            </Badge>
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4 mr-2" />
-              Configurações
-            </Button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            O que você quer divulgar hoje?
-          </h2>
-          <p className="text-lg text-gray-600">
-            Nossa IA vai criar o banner perfeito para você em segundos
-          </p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {quickActions.map((action, index) => (
-            <Card 
-              key={index} 
-              className="hover:shadow-lg transition-shadow cursor-pointer group"
-              onClick={() => navigate(`/create?category=${action.category}`)}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <action.icon className="w-8 h-8 text-purple-600 group-hover:text-purple-700" />
-                  {action.popular && (
-                    <Badge variant="secondary" className="text-xs">Popular</Badge>
-                  )}
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-2">{action.title}</h3>
-                <p className="text-sm text-gray-600">{action.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Recent Projects */}
-          <div className="lg:col-span-2">
+          
+          {/* Coluna Principal */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Banners Criados</CardDescription>
+                  <CardTitle className="text-2xl">{recentBanners.length}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center text-sm text-green-600">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    Este mês
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Plano Atual</CardDescription>
+                  <CardTitle className="text-2xl capitalize">{profile?.plan || 'Free'}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center text-sm text-blue-600">
+                    <Users className="w-4 h-4 mr-1" />
+                    {profile?.plan === 'free' ? '3/mês' : 'Ilimitado'}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Próximas Datas</CardDescription>
+                  <CardTitle className="text-2xl">5</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center text-sm text-purple-600">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    Comemorativas
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Banner Generator */}
+            <BannerGenerator />
+
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            
+            {/* Logo Upload */}
+            <LogoUploader 
+              onLogoUpload={handleLogoUpload}
+              currentLogo={profile?.logo_url}
+            />
+
+            {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart3 className="w-5 h-5 mr-2" />
-                  Projetos Recentes
-                </CardTitle>
+                <CardTitle>Ações Rápidas</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentProjects.map((project, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{project.name}</h4>
-                        <p className="text-sm text-gray-500">{project.type}</p>
-                      </div>
-                      <span className="text-sm text-gray-400">{project.date}</span>
-                    </div>
-                  ))}
-                </div>
-                <Button variant="outline" className="w-full mt-4">
-                  Ver Todos os Projetos
+              <CardContent className="space-y-3">
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline"
+                  onClick={() => navigate('/create')}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Banner
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Image className="w-4 h-4 mr-2" />
+                  Meus Banners
+                </Button>
+                <Button className="w-full justify-start" variant="outline">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Configurações
                 </Button>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Plan Usage */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Seu Plano</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600">Banners criados</span>
-                      <span className="text-sm font-medium">
-                        {userPlan === 'free' ? '2/3' : 'Ilimitado'}
-                      </span>
-                    </div>
-                    {userPlan === 'free' && (
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-purple-600 h-2 rounded-full" style={{ width: '66%' }}></div>
+            {/* Recent Banners */}
+            {recentBanners.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Banners Recentes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {recentBanners.slice(0, 3).map((banner: any) => (
+                      <div key={banner.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                          <Image className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {banner.title}
+                          </p>
+                          <p className="text-xs text-gray-500 capitalize">
+                            {banner.category.replace('_', ' ')}
+                          </p>
+                        </div>
                       </div>
-                    )}
+                    ))}
                   </div>
-                  
-                  {userPlan === 'free' && (
-                    <div className="pt-4 border-t">
-                      <p className="text-sm text-gray-600 mb-3">
-                        Upgrade para criar banners ilimitados sem marca d'água
-                      </p>
-                      <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
-                        Upgrade para Pro - R$ 29/mês
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+
           </div>
         </div>
       </div>
