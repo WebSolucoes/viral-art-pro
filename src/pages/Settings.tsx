@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import MainLayout from '@/components/layout/MainLayout';
+import LogoManager from '@/components/LogoManager';
 
 interface PlanLimits {
   banners_per_month: number;
@@ -52,7 +53,7 @@ const Settings = () => {
       console.log('Buscando dados do usuário...');
       
       // Buscar perfil
-      const { data: profileData, error: profileError } = await supabase
+      let { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user!.id)
@@ -195,6 +196,10 @@ const Settings = () => {
     }
   };
 
+  const handleLogoUploaded = (logoUrl: string) => {
+    setProfile(prev => prev ? {...prev, logo_url: logoUrl} : null);
+  };
+
   if (loading) {
     return (
       <MainLayout>
@@ -216,6 +221,12 @@ const Settings = () => {
             Gerencie seu perfil e preferências da conta
           </p>
         </div>
+
+        {/* Logo Manager */}
+        <LogoManager 
+          onLogoUploaded={handleLogoUploaded}
+          currentLogo={profile?.logo_url}
+        />
 
         {/* Profile Card */}
         <Card>
