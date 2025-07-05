@@ -66,7 +66,7 @@ const Index = () => {
                 Começar Grátis Agora
               </Button>
               
-              <Button variant="outline" size="lg" onClick={() => navigate('/pricing')} className="border-white text-lg px-8 py-3 text-transparent bg-transparent">
+              <Button variant="outline" size="lg" onClick={() => navigate('/pricing')} className="border-white text-lg px-8 py-3 bg-transparent text-white">
                 Ver Preços
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
