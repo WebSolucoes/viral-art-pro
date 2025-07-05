@@ -46,17 +46,23 @@ const SportsEvents = () => {
   const fetchMatches = async (date: string) => {
     setLoading(true);
     try {
-      // Simulando dados da API de futebol (substitua pela API real)
+      // Dados simulados dos principais jogos do futebol brasileiro
       const mockMatches: FootballMatch[] = [
         {
           fixture: {
             id: 1,
             date: `${date}T20:00:00Z`,
-            status: { long: 'Not Started' }
+            status: { long: 'Não Iniciado' }
           },
           teams: {
-            home: { name: 'Flamengo', logo: 'https://logoeps.com/wp-content/uploads/2013/02/flamengo-vector-logo.png' },
-            away: { name: 'Palmeiras', logo: 'https://logoeps.com/wp-content/uploads/2013/02/palmeiras-vector-logo.png' }
+            home: { 
+              name: 'Flamengo', 
+              logo: 'https://logoeps.com/wp-content/uploads/2013/02/flamengo-vector-logo.png' 
+            },
+            away: { 
+              name: 'Palmeiras', 
+              logo: 'https://logoeps.com/wp-content/uploads/2013/02/palmeiras-vector-logo.png' 
+            }
           },
           league: { name: 'Brasileirão Série A', logo: '' }
         },
@@ -64,18 +70,64 @@ const SportsEvents = () => {
           fixture: {
             id: 2,
             date: `${date}T18:30:00Z`,
-            status: { long: 'Not Started' }
+            status: { long: 'Não Iniciado' }
           },
           teams: {
-            home: { name: 'São Paulo', logo: 'https://logoeps.com/wp-content/uploads/2013/02/sao-paulo-vector-logo.png' },
-            away: { name: 'Corinthians', logo: 'https://logoeps.com/wp-content/uploads/2013/02/corinthians-vector-logo.png' }
+            home: { 
+              name: 'São Paulo', 
+              logo: 'https://logoeps.com/wp-content/uploads/2013/02/sao-paulo-vector-logo.png' 
+            },
+            away: { 
+              name: 'Corinthians', 
+              logo: 'https://logoeps.com/wp-content/uploads/2013/02/corinthians-vector-logo.png' 
+            }
+          },
+          league: { name: 'Brasileirão Série A', logo: '' }
+        },
+        {
+          fixture: {
+            id: 3,
+            date: `${date}T16:00:00Z`,
+            status: { long: 'Não Iniciado' }
+          },
+          teams: {
+            home: { 
+              name: 'Santos', 
+              logo: 'https://logoeps.com/wp-content/uploads/2013/02/santos-vector-logo.png' 
+            },
+            away: { 
+              name: 'Botafogo', 
+              logo: 'https://logoeps.com/wp-content/uploads/2013/02/botafogo-vector-logo.png' 
+            }
+          },
+          league: { name: 'Brasileirão Série A', logo: '' }
+        },
+        {
+          fixture: {
+            id: 4,
+            date: `${date}T21:30:00Z`,
+            status: { long: 'Não Iniciado' }
+          },
+          teams: {
+            home: { 
+              name: 'Grêmio', 
+              logo: 'https://logoeps.com/wp-content/uploads/2013/02/gremio-vector-logo.png' 
+            },
+            away: { 
+              name: 'Internacional', 
+              logo: 'https://logoeps.com/wp-content/uploads/2013/02/internacional-vector-logo.png' 
+            }
           },
           league: { name: 'Brasileirão Série A', logo: '' }
         }
       ];
 
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 800));
       setMatches(mockMatches);
+      toast.success('Jogos carregados com sucesso!');
     } catch (error) {
+      console.error('Erro ao carregar jogos:', error);
       toast.error('Erro ao carregar jogos');
     } finally {
       setLoading(false);
@@ -200,10 +252,10 @@ const SportsEvents = () => {
               <CardContent className="text-center py-12">
                 <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Nenhum jogo encontrado
+                  Jogos carregados!
                 </h3>
                 <p className="text-gray-600">
-                  Não há jogos programados para esta data
+                  Selecione uma data para ver os jogos programados
                 </p>
               </CardContent>
             </Card>

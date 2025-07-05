@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,18 +49,54 @@ const Settings = () => {
 
   const fetchUserData = async () => {
     try {
+      console.log('Buscando dados do usuário...');
+      
       // Buscar perfil
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user!.id)
         .single();
 
+      if (profileError) {
+        console.error('Erro ao buscar perfil:', profileError);
+        // Se não existe perfil, criar um novo
+        if (profileError.code === 'PGRST116') {
+          console.log('Perfil não encontrado, criando um novo...');
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user!.id,
+              plan: 'free',
+              banners_created_this_month: 0,
+              plan_limits: { banners_per_month: 3, storage_gb: 1 }
+            })
+            .select()
+            .single();
+
+          if (createError) {
+            console.error('Erro ao criar perfil:', createError);
+            throw createError;
+          }
+          
+          profileData = newProfile;
+        } else {
+          throw profileError;
+        }
+      }
+
       if (profileData) {
+        console.log('Dados do perfil:', profileData);
+        
         // Safely parse plan_limits
         let parsedLimits: PlanLimits | undefined;
         if (profileData.plan_limits) {
-          parsedLimits = profileData.plan_limits as unknown as PlanLimits;
+          try {
+            parsedLimits = profileData.plan_limits as unknown as PlanLimits;
+          } catch (error) {
+            console.error('Erro ao fazer parse dos limites do plano:', error);
+            parsedLimits = { banners_per_month: 3, storage_gb: 1 };
+          }
         }
 
         setProfile({
@@ -73,37 +110,55 @@ const Settings = () => {
       }
 
       // Buscar configurações
-      const { data: settingsData } = await supabase
+      const { data: settingsData, error: settingsError } = await supabase
         .from('user_settings')
         .select('*')
         .eq('user_id', user!.id)
         .single();
 
+      if (settingsError && settingsError.code !== 'PGRST116') {
+        console.error('Erro ao buscar configurações:', settingsError);
+      }
+
       if (settingsData) {
+        console.log('Configurações encontradas:', settingsData);
         setSettings(settingsData);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Erro ao buscar dados do usuário:', error);
+      toast.error('Erro ao carregar dados do usuário');
     } finally {
       setLoading(false);
     }
   };
 
   const saveProfile = async () => {
+    if (!profile) return;
+    
     setSaving(true);
     try {
+      console.log('Salvando perfil:', profile);
+      
       const { error } = await supabase
         .from('profiles')
         .upsert({
           user_id: user!.id,
-          full_name: profile?.full_name,
-          business_name: profile?.business_name,
+          full_name: profile.full_name,
+          business_name: profile.business_name,
+        }, {
+          onConflict: 'user_id'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao salvar perfil:', error);
+        throw error;
+      }
+      
+      console.log('Perfil salvo com sucesso');
       toast.success('Perfil atualizado com sucesso!');
-    } catch (error) {
-      toast.error('Erro ao salvar perfil');
+    } catch (error: any) {
+      console.error('Erro completo ao salvar perfil:', error);
+      toast.error('Erro ao salvar perfil: ' + (error.message || 'Erro desconhecido'));
     } finally {
       setSaving(false);
     }
@@ -112,6 +167,8 @@ const Settings = () => {
   const saveSettings = async () => {
     setSaving(true);
     try {
+      console.log('Salvando configurações:', settings);
+      
       const { error } = await supabase
         .from('user_settings')
         .upsert({
@@ -119,12 +176,20 @@ const Settings = () => {
           brand_name: settings.brand_name,
           primary_color: settings.primary_color,
           secondary_color: settings.secondary_color,
+        }, {
+          onConflict: 'user_id'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao salvar configurações:', error);
+        throw error;
+      }
+      
+      console.log('Configurações salvas com sucesso');
       toast.success('Configurações salvas com sucesso!');
-    } catch (error) {
-      toast.error('Erro ao salvar configurações');
+    } catch (error: any) {
+      console.error('Erro completo ao salvar configurações:', error);
+      toast.error('Erro ao salvar configurações: ' + (error.message || 'Erro desconhecido'));
     } finally {
       setSaving(false);
     }

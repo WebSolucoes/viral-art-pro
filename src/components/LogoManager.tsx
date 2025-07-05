@@ -19,7 +19,10 @@ const LogoManager: React.FC<LogoManagerProps> = ({ onLogoUploaded, currentLogo }
   const [previewUrl, setPreviewUrl] = useState<string>(currentLogo || '');
 
   const handleFileUpload = async (file: File) => {
-    if (!user) return;
+    if (!user) {
+      toast.error('Você precisa estar logado para fazer upload');
+      return;
+    }
     
     setUploading(true);
     
@@ -35,39 +38,58 @@ const LogoManager: React.FC<LogoManagerProps> = ({ onLogoUploaded, currentLogo }
         return;
       }
 
+      console.log('Iniciando upload da logo...');
+
       // Upload para Supabase Storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const fileName = `logo-${user.id}-${Date.now()}.${fileExt}`;
       
+      console.log('Nome do arquivo:', fileName);
+
       const { data, error } = await supabase.storage
         .from('logos')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro no upload:', error);
+        throw error;
+      }
+
+      console.log('Upload realizado com sucesso:', data);
 
       // Obter URL pública
       const { data: { publicUrl } } = supabase.storage
         .from('logos')
         .getPublicUrl(data.path);
 
+      console.log('URL pública:', publicUrl);
+
       setPreviewUrl(publicUrl);
       onLogoUploaded(publicUrl);
 
       // Salvar no perfil do usuário
-      await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           user_id: user.id,
           logo_url: publicUrl
+        }, {
+          onConflict: 'user_id'
         });
 
+      if (profileError) {
+        console.error('Erro ao salvar no perfil:', profileError);
+        throw profileError;
+      }
+
+      console.log('Logo salva no perfil com sucesso');
       toast.success('Logo carregada com sucesso!');
     } catch (error: any) {
-      console.error('Erro ao fazer upload:', error);
-      toast.error('Erro ao carregar logo: ' + error.message);
+      console.error('Erro completo ao fazer upload:', error);
+      toast.error('Erro ao carregar logo: ' + (error.message || 'Erro desconhecido'));
     } finally {
       setUploading(false);
     }
@@ -76,15 +98,35 @@ const LogoManager: React.FC<LogoManagerProps> = ({ onLogoUploaded, currentLogo }
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('Arquivo selecionado:', file.name, file.size, file.type);
       handleFileUpload(file);
     }
   };
 
-  const removeLogo = () => {
-    setPreviewUrl('');
-    onLogoUploaded('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const removeLogo = async () => {
+    try {
+      setPreviewUrl('');
+      onLogoUploaded('');
+      
+      if (user) {
+        await supabase
+          .from('profiles')
+          .upsert({
+            user_id: user.id,
+            logo_url: null
+          }, {
+            onConflict: 'user_id'
+          });
+      }
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
+      toast.success('Logo removida com sucesso!');
+    } catch (error) {
+      console.error('Erro ao remover logo:', error);
+      toast.error('Erro ao remover logo');
     }
   };
 
@@ -99,7 +141,7 @@ const LogoManager: React.FC<LogoManagerProps> = ({ onLogoUploaded, currentLogo }
       <CardContent>
         <div 
           className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition-colors"
-          onClick={() => !previewUrl && fileInputRef.current?.click()}
+          onClick={() => !uploading && fileInputRef.current?.click()}
         >
           {previewUrl ? (
             <div className="space-y-4">
@@ -117,6 +159,7 @@ const LogoManager: React.FC<LogoManagerProps> = ({ onLogoUploaded, currentLogo }
                     e.stopPropagation();
                     removeLogo();
                   }}
+                  disabled={uploading}
                 >
                   <X className="w-3 h-3" />
                 </Button>
@@ -132,8 +175,9 @@ const LogoManager: React.FC<LogoManagerProps> = ({ onLogoUploaded, currentLogo }
                   e.stopPropagation();
                   fileInputRef.current?.click();
                 }}
+                disabled={uploading}
               >
-                Alterar logo
+                {uploading ? 'Carregando...' : 'Alterar logo'}
               </Button>
             </div>
           ) : (
