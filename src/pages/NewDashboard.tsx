@@ -68,7 +68,7 @@ const NewDashboard = () => {
       // Safely parse plan_limits
       let planLimit = 3;
       if (profileData?.plan_limits) {
-        const limits = profileData.plan_limits as PlanLimits;
+        const limits = profileData.plan_limits as unknown as PlanLimits;
         planLimit = limits.banners_per_month || 3;
       }
       

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,7 +59,7 @@ const Settings = () => {
         // Safely parse plan_limits
         let parsedLimits: PlanLimits | undefined;
         if (profileData.plan_limits) {
-          parsedLimits = profileData.plan_limits as PlanLimits;
+          parsedLimits = profileData.plan_limits as unknown as PlanLimits;
         }
 
         setProfile({
