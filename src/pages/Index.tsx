@@ -1,25 +1,13 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { 
-  Sparkles, 
-  Zap, 
-  Users, 
-  Target, 
-  Crown, 
-  CheckCircle,
-  ArrowRight,
-  PlayCircle,
-  TrendingUp,
-  Shield
-} from 'lucide-react';
-
+import { Sparkles, Zap, Users, Target, Crown, CheckCircle, ArrowRight, PlayCircle, TrendingUp, Shield } from 'lucide-react';
 const Index = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-
+  const {
+    isAuthenticated
+  } = useAuth();
   const handleGetStarted = () => {
     if (isAuthenticated) {
       navigate('/dashboard');
@@ -27,9 +15,7 @@ const Index = () => {
       navigate('/auth');
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+  return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Header */}
       <header className="relative z-10 px-4 sm:px-6 lg:px-8 py-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -41,30 +27,16 @@ const Index = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
-              <Button 
-                onClick={() => navigate('/dashboard')}
-                className="bg-white text-purple-900 hover:bg-gray-100"
-              >
+            {isAuthenticated ? <Button onClick={() => navigate('/dashboard')} className="bg-white text-purple-900 hover:bg-gray-100">
                 Dashboard
-              </Button>
-            ) : (
-              <>
-                <Button 
-                  variant="ghost" 
-                  className="text-white hover:text-purple-200"
-                  onClick={() => navigate('/auth')}
-                >
+              </Button> : <>
+                <Button variant="ghost" className="text-white hover:text-purple-200" onClick={() => navigate('/auth')}>
                   Entrar
                 </Button>
-                <Button 
-                  onClick={handleGetStarted}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                >
+                <Button onClick={handleGetStarted} className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
                   Começar Grátis
                 </Button>
-              </>
-            )}
+              </>}
           </div>
         </div>
       </header>
@@ -89,21 +61,12 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                onClick={handleGetStarted}
-                size="lg"
-                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-3"
-              >
+              <Button onClick={handleGetStarted} size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-3">
                 <PlayCircle className="w-5 h-5 mr-2" />
                 Começar Grátis Agora
               </Button>
               
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="border-white text-white hover:bg-white hover:text-purple-900 text-lg px-8 py-3"
-                onClick={() => navigate('/pricing')}
-              >
+              <Button variant="outline" size="lg" onClick={() => navigate('/pricing')} className="border-white hover:bg-white text-lg px-8 py-3 text-transparent">
                 Ver Preços
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
@@ -216,29 +179,23 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Revendedores IPTV",
-                description: "Divulgue novos conteúdos, promoções e capte novos clientes",
-                icon: "📺"
-              },
-              {
-                title: "Delivery & Food",
-                description: "Promova pratos, ofertas especiais e atraia mais pedidos",
-                icon: "🍔"
-              },
-              {
-                title: "Lojas Online",
-                description: "Produtos em destaque, liquidações e lançamentos",
-                icon: "🛍️"
-              },
-              {
-                title: "Social Medias",
-                description: "Atenda múltiplos clientes pequenos com agilidade",
-                icon: "📱"
-              }
-            ].map((audience, index) => (
-              <div key={index} className="bg-white p-6 rounded-xl shadow-sm border">
+            {[{
+            title: "Revendedores IPTV",
+            description: "Divulgue novos conteúdos, promoções e capte novos clientes",
+            icon: "📺"
+          }, {
+            title: "Delivery & Food",
+            description: "Promova pratos, ofertas especiais e atraia mais pedidos",
+            icon: "🍔"
+          }, {
+            title: "Lojas Online",
+            description: "Produtos em destaque, liquidações e lançamentos",
+            icon: "🛍️"
+          }, {
+            title: "Social Medias",
+            description: "Atenda múltiplos clientes pequenos com agilidade",
+            icon: "📱"
+          }].map((audience, index) => <div key={index} className="bg-white p-6 rounded-xl shadow-sm border">
                 <div className="text-4xl mb-4 text-center">{audience.icon}</div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2 text-center">
                   {audience.title}
@@ -246,8 +203,7 @@ const Index = () => {
                 <p className="text-gray-600 text-center text-sm">
                   {audience.description}
                 </p>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -266,11 +222,7 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                onClick={handleGetStarted}
-                size="lg"
-                className="bg-white text-purple-900 hover:bg-gray-100 text-lg px-8 py-3"
-              >
+              <Button onClick={handleGetStarted} size="lg" className="bg-white text-purple-900 hover:bg-gray-100 text-lg px-8 py-3">
                 <Shield className="w-5 h-5 mr-2" />
                 Começar Grátis - 3 Banners/Mês
               </Button>
@@ -302,8 +254,6 @@ const Index = () => {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
