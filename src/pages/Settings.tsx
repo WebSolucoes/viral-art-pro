@@ -11,16 +11,18 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import MainLayout from '@/components/layout/MainLayout';
 
+interface PlanLimits {
+  banners_per_month: number;
+  storage_gb: number;
+}
+
 interface UserProfile {
   full_name?: string;
   business_name?: string;
   logo_url?: string;
   plan: string;
   banners_created_this_month: number;
-  plan_limits?: {
-    banners_per_month: number;
-    storage_gb: number;
-  };
+  plan_limits?: PlanLimits;
 }
 
 interface UserSettings {
@@ -55,7 +57,20 @@ const Settings = () => {
         .single();
 
       if (profileData) {
-        setProfile(profileData);
+        // Safely parse plan_limits
+        let parsedLimits: PlanLimits | undefined;
+        if (profileData.plan_limits) {
+          parsedLimits = profileData.plan_limits as PlanLimits;
+        }
+
+        setProfile({
+          full_name: profileData.full_name,
+          business_name: profileData.business_name,
+          logo_url: profileData.logo_url,
+          plan: profileData.plan || 'free',
+          banners_created_this_month: profileData.banners_created_this_month || 0,
+          plan_limits: parsedLimits
+        });
       }
 
       // Buscar configurações

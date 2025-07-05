@@ -11,6 +11,11 @@ import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import NewDashboard from "./pages/NewDashboard";
+import SportsEvents from "./pages/SportsEvents";
+import MoviesAndSeries from "./pages/MoviesAndSeries";
+import MyBanners from "./pages/MyBanners";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 

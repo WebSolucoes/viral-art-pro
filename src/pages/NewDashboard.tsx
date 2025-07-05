@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +24,11 @@ interface DashboardStats {
   totalBanners: number;
   bannersThisMonth: number;
   planLimit: number;
+}
+
+interface PlanLimits {
+  banners_per_month: number;
+  storage_gb: number;
 }
 
 const NewDashboard = () => {
@@ -60,7 +64,13 @@ const NewDashboard = () => {
 
       const totalBanners = bannersData?.length || 0;
       const bannersThisMonth = profileData?.banners_created_this_month || 0;
-      const planLimit = profileData?.plan_limits?.banners_per_month || 3;
+      
+      // Safely parse plan_limits
+      let planLimit = 3;
+      if (profileData?.plan_limits) {
+        const limits = profileData.plan_limits as PlanLimits;
+        planLimit = limits.banners_per_month || 3;
+      }
       
       setStats({
         totalBanners,
