@@ -1,279 +1,153 @@
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/hooks/useAuth';
+import { 
+  BarChart3, 
+  Crown, 
+  History, 
+  LogOut, 
+  Plus, 
+  Settings, 
+  Sparkles,
+  Palette,
+  Library
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import LogoUploader from '@/components/LogoUploader';
-import BannerGenerator from '@/components/BannerGenerator';
-import { 
-  LayoutDashboard, 
-  Image, 
-  Settings, 
-  LogOut, 
-  Plus,
-  TrendingUp,
-  Users,
-  Calendar
-} from 'lucide-react';
+
+import ImprovedBannerGenerator from '@/components/ImprovedBannerGenerator';
+import TemplateLibrary from '@/components/TemplateLibrary';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<any>(null);
-  const [recentBanners, setRecentBanners] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      loadProfile();
-      loadRecentBanners();
-    }
-  }, [user]);
-
-  const loadProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user!.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      
-      if (!data) {
-        // Create profile if it doesn't exist
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: user!.id,
-            full_name: user!.user_metadata?.full_name,
-            business_name: user!.user_metadata?.business_name,
-          })
-          .select()
-          .single();
-        
-        if (insertError) throw insertError;
-        setProfile(newProfile);
-      } else {
-        setProfile(data);
-      }
-    } catch (error: any) {
-      console.error('Error loading profile:', error);
-      toast.error('Erro ao carregar perfil');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadRecentBanners = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('banners')
-        .select('*')
-        .eq('user_id', user!.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error) throw error;
-      setRecentBanners(data || []);
-    } catch (error: any) {
-      console.error('Error loading banners:', error);
-    }
-  };
-
-  const handleLogoUpload = async (file: File) => {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user!.id}/logo.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('logos')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('logos')
-        .getPublicUrl(fileName);
-
-      // Update profile with logo URL
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ logo_url: publicUrl })
-        .eq('user_id', user!.id);
-
-      if (updateError) throw updateError;
-
-      setProfile(prev => ({ ...prev, logo_url: publicUrl }));
-      toast.success('Logo salva com sucesso!');
-    } catch (error: any) {
-      console.error('Error uploading logo:', error);
-      toast.error('Erro ao fazer upload do logo');
-    }
-  };
+  const [activeTab, setActiveTab] = useState('generator');
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await signOut();
+      navigate('/');
+      toast.success('Logout realizado com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao fazer logout');
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
+  const stats = [
+    { title: 'Banners Criados', value: '12', icon: BarChart3, color: 'text-blue-600' },
+    { title: 'Templates Salvos', value: '3', icon: Palette, color: 'text-purple-600' },
+    { title: 'Downloads', value: '28', icon: History, color: 'text-green-600' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg">
-                <LayoutDashboard className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">PostPix IA</h1>
-                <p className="text-sm text-gray-500">Dashboard</p>
-              </div>
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-8 h-8 text-purple-600" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                PostPix IA
+              </h1>
             </div>
+            <Badge variant="secondary" className="hidden md:block">
+              Dashboard
+            </Badge>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+              <Crown className="w-3 h-3 mr-1" />
+              Plano Gratuito
+            </Badge>
             
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Olá, {profile?.full_name || user?.email}!
-              </span>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
-              </Button>
+            <div className="flex items-center space-x-2 text-sm text-gray-600">
+              <span>Olá, {user?.email?.split('@')[0]}!</span>
             </div>
+
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Coluna Principal */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>Banners Criados</CardDescription>
-                  <CardTitle className="text-2xl">{recentBanners.length}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center text-sm text-green-600">
-                    <TrendingUp className="w-4 h-4 mr-1" />
-                    Este mês
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <Card key={index}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">{stat.title}</p>
+                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>Plano Atual</CardDescription>
-                  <CardTitle className="text-2xl capitalize">{profile?.plan || 'Free'}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center text-sm text-blue-600">
-                    <Users className="w-4 h-4 mr-1" />
-                    {profile?.plan === 'free' ? '3/mês' : 'Ilimitado'}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardDescription>Próximas Datas</CardDescription>
-                  <CardTitle className="text-2xl">5</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center text-sm text-purple-600">
-                    <Calendar className="w-4 h-4 mr-1" />
-                    Comemorativas
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Banner Generator */}
-            <BannerGenerator />
-
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            
-            {/* Logo Upload */}
-            <LogoUploader 
-              onLogoUpload={handleLogoUpload}
-              currentLogo={profile?.logo_url}
-            />
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ações Rápidas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => navigate('/create')}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Banner
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <Image className="w-4 h-4 mr-2" />
-                  Meus Banners
-                </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Configurações
-                </Button>
+                  <stat.icon className={`w-8 h-8 ${stat.color}`} />
+                </div>
               </CardContent>
             </Card>
-
-            {/* Recent Banners */}
-            {recentBanners.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Banners Recentes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {recentBanners.slice(0, 3).map((banner: any) => (
-                      <div key={banner.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                          <Image className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {banner.title}
-                          </p>
-                          <p className="text-xs text-gray-500 capitalize">
-                            {banner.category.replace('_', ' ')}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-          </div>
+          ))}
         </div>
+
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="generator" className="flex items-center space-x-2">
+              <Sparkles className="w-4 h-4" />
+              <span>Gerador IA</span>
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center space-x-2">
+              <Library className="w-4 h-4" />
+              <span>Templates</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center space-x-2">
+              <History className="w-4 h-4" />
+              <span>Histórico</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="generator">
+            <ImprovedBannerGenerator />
+          </TabsContent>
+
+          <TabsContent value="templates">
+            <TemplateLibrary />
+          </TabsContent>
+
+          <TabsContent value="history">
+            <Card>
+              <CardHeader>
+                <CardTitle>Seus Banners Criados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <History className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Nenhum banner ainda
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Seus banners criados aparecerão aqui
+                  </p>
+                  <Button 
+                    onClick={() => setActiveTab('generator')}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Criar Primeiro Banner
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
