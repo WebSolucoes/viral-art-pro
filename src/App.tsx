@@ -26,7 +26,27 @@ const App = () => (
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <Dashboard />
+              <NewDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/sports" element={
+            <ProtectedRoute>
+              <SportsEvents />
+            </ProtectedRoute>
+          } />
+          <Route path="/movies" element={
+            <ProtectedRoute>
+              <MoviesAndSeries />
+            </ProtectedRoute>
+          } />
+          <Route path="/banners" element={
+            <ProtectedRoute>
+              <MyBanners />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           } />
           <Route path="/create" element={
@@ -34,7 +54,6 @@ const App = () => (
               <CreateBanner />
             </ProtectedRoute>
           } />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

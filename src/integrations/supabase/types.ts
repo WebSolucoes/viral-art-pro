@@ -11,10 +11,13 @@ export type Database = {
     Tables: {
       banners: {
         Row: {
+          banner_type: string | null
           banner_url: string | null
           category: string
           content_name: string | null
           created_at: string
+          dimensions: string | null
+          event_data: Json | null
           generated_text: string | null
           id: string
           title: string
@@ -22,10 +25,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          banner_type?: string | null
           banner_url?: string | null
           category: string
           content_name?: string | null
           created_at?: string
+          dimensions?: string | null
+          event_data?: Json | null
           generated_text?: string | null
           id?: string
           title: string
@@ -33,10 +39,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          banner_type?: string | null
           banner_url?: string | null
           category?: string
           content_name?: string | null
           created_at?: string
+          dimensions?: string | null
+          event_data?: Json | null
           generated_text?: string | null
           id?: string
           title?: string
@@ -54,6 +63,7 @@ export type Database = {
           id: string
           logo_url: string | null
           plan: string | null
+          plan_limits: Json | null
           updated_at: string
           user_id: string
         }
@@ -65,6 +75,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           plan?: string | null
+          plan_limits?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -76,6 +87,76 @@ export type Database = {
           id?: string
           logo_url?: string | null
           plan?: string | null
+          plan_limits?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sports_events: {
+        Row: {
+          away_logo: string | null
+          away_team: string
+          created_at: string
+          event_id: number
+          home_logo: string | null
+          home_team: string
+          id: string
+          league: string | null
+          match_date: string
+          status: string | null
+        }
+        Insert: {
+          away_logo?: string | null
+          away_team: string
+          created_at?: string
+          event_id: number
+          home_logo?: string | null
+          home_team: string
+          id?: string
+          league?: string | null
+          match_date: string
+          status?: string | null
+        }
+        Update: {
+          away_logo?: string | null
+          away_team?: string
+          created_at?: string
+          event_id?: number
+          home_logo?: string | null
+          home_team?: string
+          id?: string
+          league?: string | null
+          match_date?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          brand_name: string | null
+          created_at: string
+          id: string
+          primary_color: string | null
+          secondary_color: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_name?: string | null
+          created_at?: string
+          id?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_name?: string | null
+          created_at?: string
+          id?: string
+          primary_color?: string | null
+          secondary_color?: string | null
           updated_at?: string
           user_id?: string
         }
